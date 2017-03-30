@@ -42,10 +42,21 @@ main() {
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer ${heroku_key}")
 
-  local output_stream_url
+  local build_id output_stream_url
+  build_id=$(echo "${build_output}" | python -c 'import sys, json; print(json.load(sys.stdin)["id"])')
   output_stream_url=$(echo "${build_output}" | python -c 'import sys, json; print(json.load(sys.stdin)["output_stream_url"])')
 
   curl "${output_stream_url}"
+
+  build_status=$(curl -s -n "https://api.heroku.com/apps/${app_name}/builds/${build_id}" \
+    -H 'Accept: application/vnd.heroku+json; version=3' \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer ${heroku_key}" \
+    | python -c 'import sys, json; print(json.load(sys.stdin)["status"])')
+
+  if [ "${build_status}" = "failed" ]; then
+    fail "heroku build failed"
+  fi
 }
 
 main
