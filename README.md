@@ -3,7 +3,7 @@
 [![wercker status](https://app.wercker.com/status/c4725867891ca5e261c8a7b06a0ff657/m "wercker status")](https://app.wercker.com/project/bykey/c4725867891ca5e261c8a7b06a0ff657)
 
 Deploy to Heroku like [wercker/step-heroku-deploy](https://github.com/wercker/step-heroku-deploy), but this step use [Heroku Platform API](https://devcenter.heroku.com/articles/platform-api-reference) instead of `heroku toolbelt`.  
-This step do not support `run` option. If you want to run a command on heroku after deployment, use [Heroku Release Phase (currently beta)](https://devcenter.heroku.com/articles/release-phase).
+This step do not support `run` option. If you want to run a command on heroku after deployment, use [Heroku Release Phase](https://devcenter.heroku.com/articles/release-phase).
 
 # Options:
 
