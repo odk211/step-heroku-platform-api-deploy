@@ -2,6 +2,12 @@
 
 set -eu
 
+dig_json() {
+  local keys
+  keys=$(echo "$*" | tr ' ' '\n' | awk '{keys=keys"[\""$1"\"]"}END{print keys}')
+  python -c "import sys, json; print(json.load(sys.stdin)${keys})"
+}
+
 main() {
   local app_name=${WERCKER_HEROKU_PLATFORM_API_DEPLOY_APP_NAME:?"app-name is required"}
   local heroku_key=${WERCKER_HEROKU_PLATFORM_API_DEPLOY_KEY:?"key is required"}
@@ -29,8 +35,8 @@ main() {
     -H "Authorization: Bearer ${heroku_key}")
 
   local put_url get_url
-  put_url=$(echo "${source_blob_url}" | python -c 'import sys, json; print(json.load(sys.stdin)["source_blob"]["put_url"])')
-  get_url=$(echo "${source_blob_url}" | python -c 'import sys, json; print(json.load(sys.stdin)["source_blob"]["get_url"])')
+  put_url=$(echo "${source_blob_url}" | dig_json source_blob put_url)
+  get_url=$(echo "${source_blob_url}" | dig_json source_blob get_url)
 
   curl "${put_url}" -X PUT -H 'Content-Type:' --data-binary "@${source_blob}"
 
@@ -43,8 +49,8 @@ main() {
     -H "Authorization: Bearer ${heroku_key}")
 
   local build_id output_stream_url
-  build_id=$(echo "${build_output}" | python -c 'import sys, json; print(json.load(sys.stdin)["id"])')
-  output_stream_url=$(echo "${build_output}" | python -c 'import sys, json; print(json.load(sys.stdin)["output_stream_url"])')
+  build_id=$(echo "${build_output}" | dig_json id)
+  output_stream_url=$(echo "${build_output}" | dig_json output_stream_url)
 
   curl "${output_stream_url}"
 
@@ -52,7 +58,7 @@ main() {
     -H 'Accept: application/vnd.heroku+json; version=3' \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer ${heroku_key}" \
-    | python -c 'import sys, json; print(json.load(sys.stdin)["status"])')
+    | dig_json status)
 
   if [ "${build_status}" = "failed" ]; then
     fail "heroku build failed"
