@@ -29,14 +29,14 @@ main() {
 
   info "Deploying Heroku Version ${heroku_version}"
 
-  local source_blob_url
-  source_blob_url=$(curl -s -n -X POST https://api.heroku.com/sources \
+  local source_blob_json
+  source_blob_json=$(curl -s -n -X POST https://api.heroku.com/sources \
     -H 'Accept: application/vnd.heroku+json; version=3' \
     -H "Authorization: Bearer ${heroku_key}")
 
   local put_url get_url
-  put_url=$(echo "${source_blob_url}" | dig_json source_blob put_url)
-  get_url=$(echo "${source_blob_url}" | dig_json source_blob get_url)
+  put_url=$(echo "${source_blob_json}" | dig_json source_blob put_url)
+  get_url=$(echo "${source_blob_json}" | dig_json source_blob get_url)
 
   curl "${put_url}" -X PUT -H 'Content-Type:' --data-binary "@${source_blob}"
 
